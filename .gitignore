@@ -1,0 +1,8 @@
+_datos/
+_capturas/
+_chromeprof/
+_chk_prof*/
+_*.mjs
+_*.ps1
+js/data.json
+node_modules/
