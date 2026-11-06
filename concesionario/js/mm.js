@@ -4,7 +4,8 @@
   var ALL = window.STOCK || [];
   var S = ALL.filter(function (v) { return !v.oculto; });
   var B = '../';
-  var WA = '34687953751', TEL = 'tel:+34687953751', TEL_TXT = '687 95 37 51', MAIL = 'info@bilbotruck.com';
+  var WA = '34687953751', TEL = 'tel:+34687953751', TEL_TXT = '687 95 37 51', MAIL = 'info@bilbotruck.com';
+  var PRIV = '<a href="https://bilbotruck.com/politica-de-privacidad/" target="_blank" rel="noopener">política de privacidad</a>';
   var MAPS_DIR = 'https://www.google.com/maps/dir/?api=1&destination=Bilbotruck%20Isuzu%2C%20Bedia';
   var $ = function (s, el) { return (el || document).querySelector(s); };
   var $$ = function (s, el) { return Array.prototype.slice.call((el || document).querySelectorAll(s)); };
@@ -46,20 +47,20 @@
   var WA_ICO = '<svg class="i wa" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 2a9.9 9.9 0 0 0-8.5 15l-1.4 5 5.2-1.4A9.9 9.9 0 1 0 12.04 2zm5.8 14.1c-.25.7-1.44 1.33-2 1.38-.52.05-1 .24-3.38-.7-2.85-1.12-4.65-4.04-4.79-4.23-.14-.19-1.14-1.52-1.14-2.9 0-1.38.72-2.06.98-2.34.25-.28.55-.35.74-.35l.53.01c.17 0 .4-.06.62.48.25.6.84 2.05.91 2.2.07.14.12.31.02.5-.1.19-.14.31-.28.48l-.42.49c-.14.14-.29.29-.12.57.16.28.73 1.2 1.57 1.95 1.08.96 1.99 1.26 2.27 1.4.28.14.45.12.61-.07.17-.19.7-.82.89-1.1.19-.28.37-.23.63-.14.26.1 1.64.77 1.92.91.28.14.47.21.54.33.07.12.07.68-.18 1.38z"/></svg>';
 
   // ---------- tarjeta de vehículo ----------
-  function rib(v) { return v.nuevo ? '<span class="c-rib">' + (v.garantia >= 60 ? 'Nuevo' : 'KM 0') + '</span>' : ''; }
+  function rib(v) { return v.nuevo ? '<span class="c-rib">' + (v.garantia >= 60 ? 'Nuevo' : 'km 0') + '</span>' : ''; }
   function card(v, list) {
     var spec = list
       ? '<div class="c-spec2"><span>' + v.anio + '</span><span>' + kmTxt(v) + '</span><span>' + esc(v.cambio || v.carroceria) + '</span><span>' + (v.cv ? v.cv + ' CV' : '') + '</span><span>' + esc(v.comb || '') + '</span><span>' + (v.garantia ? 'Garantía ' + garTxt(v.garantia) : '') + '</span></div>'
       : '<div class="c-spec"><div><span>' + v.anio + '</span><span>' + kmTxt(v) + '</span></div><div><span>' + esc(v.comb || '') + '</span><span>' + esc(v.cambio || (v.cv ? v.cv + ' CV' : v.carroceria)) + '</span></div></div>';
     return '<article class="card"><a href="vehiculo.html?id=' + v.id + '">' +
-      '<div class="c-img"><img src="' + B + 'assets/stock/' + v.id + '-card.jpg" width="480" height="360" alt="" loading="lazy">' + rib(v) + (v.ayto ? '<span class="c-tag">Ex-ayuntamiento</span>' : '') + '</div>' +
+      '<div class="c-img"><img src="' + B + 'assets/stock/' + v.id + '-card.jpg" srcset="' + B + 'assets/stock/' + v.id + '-card.jpg 480w, ' + B + 'assets/stock/' + v.id + '-1.jpg 800w" sizes="(max-width:560px) calc(100vw - 40px), (max-width:760px) 50vw, (max-width:1000px) 33vw, 300px" width="480" height="360" alt="" loading="lazy">' + rib(v) + (v.ayto ? '<span class="c-tag">De ayuntamiento</span>' : '') + '</div>' +
       '<h3 class="c-tit">' + esc(nombre(v)) + '</h3>' + spec +
       '<p class="c-price"><b>' + fmt(v.precio) + ' €</b><small>' + (v.iva ? 'IVA incl.' : '+ IVA') + '</small></p>' +
       '</a></article>';
   }
 
   // ---------- formularios que abren WhatsApp con el mensaje escrito ----------
-  var FALTA = { nombre: 'tu nombre', tel: 'tu teléfono', acepto: 'marcar la casilla de aceptación', mensaje: 'el mensaje', dia: 'elegir un día en el calendario' };
+  var FALTA = { nombre: 'tu nombre', tel: 'tu teléfono', acepto: 'la casilla de aceptación', mensaje: 'el mensaje', dia: 'el día de la cita' };
   function waForm(f, req, build) {
     if (!f) return;
     var msg = $('.form-msg', f);
@@ -85,12 +86,13 @@
         if (first.type === 'hidden') { var bx = $('[data-for="' + bad[0] + '"]', f); var fb = bx && ($('button[tabindex="0"]', bx) || bx); if (fb) fb.focus(); }
         else first.focus();
         msg.className = 'form-msg err';
-        msg.textContent = 'Falta ' + bad.map(function (n) { return n === 'tel' && g('tel') ? 'un teléfono válido' : (FALTA[n] || n); }).join(', ').replace(/, ([^,]*)$/, ' y $1') + '.';
+        var items = bad.map(function (n) { return n === 'tel' && g('tel') ? 'un teléfono de al menos 9 cifras' : (FALTA[n] || n); });
+        msg.textContent = (items.length > 1 ? 'Faltan ' : 'Falta ') + items.join(', ').replace(/, ([^,]*)$/, ' y $1') + '.';
         return;
       }
       window.open(wa(build(g)), '_blank', 'noopener');
       msg.className = 'form-msg';
-      msg.textContent = 'Se ha abierto WhatsApp con tu mensaje. Envíalo y te contestamos enseguida.';
+      msg.textContent = 'Se ha abierto WhatsApp con tu mensaje. Envíalo y te contestamos lo antes posible.';
     });
   }
 
@@ -107,6 +109,21 @@
     li.addEventListener('mouseleave', function () { li.classList.remove('shut'); });
     li.addEventListener('focusout', function (e) { if (!li.contains(e.relatedTarget)) li.classList.remove('shut'); });
   });
+  // Escape también cierra el submenú abierto solo con el ratón
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') $$('.has-sub').forEach(function (li) { if (li.matches(':hover')) li.classList.add('shut'); });
+  });
+  // enlaces a la misma página (#main, #solicitar): sin entrada nueva en el historial y con el foco en el destino
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest ? e.target.closest('a[href^="#"]') : null;
+    if (!a || a.getAttribute('href').length < 2) return;
+    var t = document.getElementById(a.getAttribute('href').slice(1));
+    if (!t) return;
+    e.preventDefault();
+    if (!t.hasAttribute('tabindex')) t.setAttribute('tabindex', '-1');
+    t.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    t.focus({ preventScroll: true });
+  });
   waForm($('#form-llamada'), ['nombre', 'tel', 'acepto'], function (g) {
     return 'Hola Bilbotruck, ¿me podéis llamar?\nNombre: ' + g('nombre') + '\nTeléfono: ' + g('tel');
   });
@@ -115,7 +132,7 @@
   var sl = $('#slider');
   if (sl) {
     var slides = $$('.slide', sl), dots = $$('.s-dots button:not(.s-pause)', sl), pb = $('.s-pause', sl);
-    var cur = 0, timer = null, userPaused = reduce, hold = false;
+    var cur = 0, timer = null, userPaused = reduce, hov = false, foc = false;
     var show = function (i) {
       var o = slides[cur];
       o.classList.remove('on'); o.setAttribute('aria-hidden', 'true'); o.setAttribute('inert', '');
@@ -125,7 +142,7 @@
       s.classList.add('on'); s.removeAttribute('aria-hidden'); s.removeAttribute('inert');
       dots.forEach(function (d, j) { d.setAttribute('aria-current', j === cur ? 'true' : 'false'); });
     };
-    var tick = function () { clearTimeout(timer); if (!userPaused && !hold && !document.hidden) timer = setTimeout(function () { show(cur + 1); tick(); }, 6000); };
+    var tick = function () { clearTimeout(timer); if (!userPaused && !hov && !foc && !document.hidden) timer = setTimeout(function () { show(cur + 1); tick(); }, 6000); };
     var setPause = function () {
       if (!pb) return;
       pb.classList.toggle('paused', userPaused);
@@ -135,14 +152,19 @@
     $('.s-next', sl).addEventListener('click', function () { show(cur + 1); tick(); });
     dots.forEach(function (d, j) { d.addEventListener('click', function () { show(j); tick(); }); });
     if (pb) pb.addEventListener('click', function () { userPaused = !userPaused; setPause(); tick(); });
-    sl.addEventListener('mouseenter', function () { hold = true; clearTimeout(timer); });
-    sl.addEventListener('mouseleave', function () { hold = false; tick(); });
-    sl.addEventListener('focusin', function () { hold = true; clearTimeout(timer); });
-    sl.addEventListener('focusout', function (e) { if (!sl.contains(e.relatedTarget)) { hold = false; tick(); } });
+    sl.addEventListener('mouseenter', function () { hov = true; clearTimeout(timer); });
+    sl.addEventListener('mouseleave', function () { hov = false; tick(); });
+    sl.addEventListener('focusin', function () { foc = true; clearTimeout(timer); });
+    sl.addEventListener('focusout', function (e) { if (!sl.contains(e.relatedTarget)) { foc = false; tick(); } });
     document.addEventListener('visibilitychange', tick);
-    var sx = null;
-    sl.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; }, { passive: true });
-    sl.addEventListener('touchend', function (e) { if (sx === null) return; var dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 40) { show(cur + (dx < 0 ? 1 : -1)); tick(); } sx = null; }, { passive: true });
+    var sx = null, sy = 0;
+    sl.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
+    sl.addEventListener('touchend', function (e) {
+      if (sx === null) return;
+      var dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > 1.5 * Math.abs(dy)) { show(cur + (dx < 0 ? 1 : -1)); tick(); }
+      sx = null;
+    }, { passive: true });
     setPause(); tick();
   }
 
@@ -150,8 +172,12 @@
   function rowScroller(list, prev, next) {
     if (!list || !prev || !next) return;
     var upd = function () {
+      var f = document.activeElement;
       prev.disabled = list.scrollLeft <= 2;
       next.disabled = list.scrollLeft + list.clientWidth >= list.scrollWidth - 2;
+      // si la flecha con el foco se desactiva, el foco pasa a la otra en vez de perderse
+      if (f === next && next.disabled && !prev.disabled) prev.focus();
+      else if (f === prev && prev.disabled && !next.disabled) next.focus();
     };
     var step = function () { return Math.max(list.clientWidth * 0.8, 120); };
     prev.addEventListener('click', function () { list.scrollBy({ left: -step(), behavior: reduce ? 'auto' : 'smooth' }); });
@@ -166,15 +192,18 @@
 
   // ---------- buscador (portada y listado) ----------
   var page = document.body.getAttribute('data-page');
-  var sf = $('#search'), F = {}, R = {}, onChange = function () {};
+  var sf = $('#search'), F = {}, R = {}, onChange = function () {}, refresh = function () {};
   var FMT_R = { p: function (n) { return fmt(n) + ' €'; }, k: function (n) { return fmt(n) + ' km'; }, a: function (n) { return String(n); } };
   var TXT_R = { p: function (n) { return fmt(n) + ' euros'; }, k: function (n) { return fmt(n) + ' kilómetros'; }, a: function (n) { return 'año ' + n; } };
+  var TH = window.matchMedia && matchMedia('(pointer:coarse)').matches ? 26 : 16; // ancho del tirador (más grande en pantallas táctiles)
   function syncR(k, moved) {
     var r = R[k], lo = +r.lo.value, hi = +r.hi.value;
+    // los dos tiradores juntos: si arrastras hacia la izquierda, se mueve el mínimo
+    if (moved === r.hi && r.j != null && hi < r.j) { r.lo.value = hi; lo = hi; r.hi.value = r.j; hi = r.j; }
     if (lo > hi) { if (moved === r.lo) { r.lo.value = hi; lo = hi; } else { r.hi.value = lo; hi = lo; } }
     var span = (r.max - r.min) || 1, a = (lo - r.min) / span, b = (hi - r.min) / span;
-    r.fill.style.left = 'calc(8px + (100% - 16px) * ' + a + ')';
-    r.fill.style.right = 'calc(8px + (100% - 16px) * ' + (1 - b) + ')';
+    r.fill.style.left = 'calc(' + TH / 2 + 'px + (100% - ' + TH + 'px) * ' + a + ')';
+    r.fill.style.right = 'calc(' + TH / 2 + 'px + (100% - ' + TH + 'px) * ' + (1 - b) + ')';
     r.vlo.textContent = FMT_R[k](lo);
     r.vhi.textContent = FMT_R[k](hi);
     r.lo.setAttribute('aria-valuetext', TXT_R[k](lo));
@@ -183,9 +212,9 @@
     r.hi.style.zIndex = 2;
   }
   function setR(k, lo, hi) {
-    var r = R[k];
-    r.lo.value = lo != null && lo !== '' ? lo : r.min;
-    r.hi.value = hi != null && hi !== '' ? hi : r.max;
+    var r = R[k], nl = parseFloat(lo), nh = parseFloat(hi);
+    r.lo.value = isFinite(nl) ? nl : r.min;
+    r.hi.value = isFinite(nh) ? nh : r.max;
     syncR(k, r.hi);
   }
   function fillModelos() {
@@ -217,7 +246,8 @@
     if (v.km < s.kmin || v.km > s.kmax) return false;
     if (v.anio < s.amin || v.anio > s.amax) return false;
     if (s.q) {
-      var hay = norm([v.marca, v.modelo, v.version, v.carroceria, v.comb, CATS[v.cat], (v.desc || []).join(' ')].join(' '));
+      var hay = norm([v.marca, v.modelo, v.version, v.carroceria, v.comb, v.cambio || '', v.etiqueta || '', CATS[v.cat], (v.desc || []).join(' ')].join(' '));
+      hay += ' ' + hay.replace(/-/g, ''); // «dmax» encuentra «D-Max» y «pickup», «pick-up»
       if (/pluma|grua|pulpo/.test(hay)) hay += ' grua pluma';
       if (/basculante|volquete/.test(hay)) hay += ' basculante volquete';
       if (/isoterm|frio|frigorif/.test(hay)) hay += ' isotermo frigorifico frio';
@@ -249,8 +279,20 @@
     F = { q: $('#s-q'), cat: $('#s-cat'), marca: $('#s-marca'), modelo: $('#s-modelo') };
     $$('.rng-box', sf).forEach(function (bx) {
       var k = bx.getAttribute('data-rng'), ins = $$('input', bx);
-      R[k] = { lo: ins[0], hi: ins[1], fill: $('.rng-fill', bx), vlo: $('.lo', bx), vhi: $('.hi', bx), min: +ins[0].min, max: +ins[0].max };
-      ins.forEach(function (inp) { inp.addEventListener('input', function () { syncR(k, inp); onChange(); }); });
+      R[k] = { lo: ins[0], hi: ins[1], fill: $('.rng-fill', bx), vlo: $('.lo', bx), vhi: $('.hi', bx), min: +ins[0].min, max: +ins[0].max, j: null };
+      ins.forEach(function (inp) {
+        inp.addEventListener('input', function () { syncR(k, inp); onChange(true); });
+        inp.addEventListener('change', function () { R[k].j = null; onChange(); });
+      });
+      ins[1].addEventListener('pointerdown', function () { R[k].j = +ins[0].value === +ins[1].value ? +ins[1].value : null; });
+      // pulsar en la barra mueve el tirador más cercano (sin tener que arrastrar)
+      $('.rng', bx).addEventListener('click', function (e) {
+        if (e.target.tagName === 'INPUT') return;
+        var rc = this.getBoundingClientRect(), f = Math.min(1, Math.max(0, (e.clientX - rc.left - TH / 2) / (rc.width - TH)));
+        var st = +ins[0].step || 1, val = Math.round((R[k].min + f * (R[k].max - R[k].min)) / st) * st;
+        var t = Math.abs(val - ins[0].value) <= Math.abs(val - ins[1].value) ? ins[0] : ins[1];
+        t.value = val; syncR(k, t); onChange(); t.focus();
+      });
       syncR(k, ins[1]);
     });
     fillModelos();
@@ -262,18 +304,25 @@
       onChange();
     });
     if (F.q) F.q.addEventListener('input', debounce(function () { onChange(); }, 160));
+    // al volver con «Atrás», el navegador repone los valores del formulario: repintamos etiquetas, modelos y contador
+    window.addEventListener('pageshow', function () { fillModelos(); ['p', 'k', 'a'].forEach(function (k) { syncR(k, R[k].hi); }); refresh(); });
   }
 
   // ---------- portada ----------
   if (page === 'home') {
-    var DEST = ['71712048', '71750009', '71799527', '71743747', '71743659', '71376593', '71712586', '71710105'];
+    var DEST = ['71712048', '71750009', '71799527', '71743747', '71743659', '71712600', '71712586', '71710105'];
     var of = $('#ofertas');
     if (of) of.innerHTML = DEST.map(function (id) { return S.find(function (v) { return v.id === id; }); }).filter(Boolean).map(function (v) { return card(v); }).join('');
-    var sbtn = $('#s-btn');
+    var sbtn = $('#s-btn'), live = $('#s-live'), liveT = null, first = true;
     onChange = function () {
       var s = readForm(), n = S.filter(function (v) { return match(v, s); }).length;
       sbtn.textContent = n === 1 ? 'Ver 1 vehículo' : 'Ver ' + n + ' vehículos';
+      // el lector de pantalla oye el recuento cuando el usuario deja de mover filtros (no al cargar)
+      clearTimeout(liveT);
+      if (!first && live) liveT = setTimeout(function () { live.textContent = n === 1 ? '1 vehículo encontrado' : n + ' vehículos encontrados'; }, 700);
+      first = false;
     };
+    refresh = onChange;
     sf.addEventListener('submit', function (e) { e.preventDefault(); location.href = 'stock.html' + toQuery(readForm()); });
     onChange();
   }
@@ -282,7 +331,7 @@
   if (page === 'stock') {
     var qs = new URLSearchParams(location.search);
     var setSel = function (el, val) { if (!val) return; el.value = val; if (el.value !== val) el.value = ''; };
-    var ppOk = { 12: 1, 24: 1, 48: 1 };
+    var ppOk = { 12: 1, 24: 1, 999: 1 };
     var X = { serie: SERIES[qs.get('serie')] ? qs.get('serie') : '', km0: qs.get('km0') === '1', orden: qs.get('orden') || 'dest', pp: ppOk[qs.get('pp')] ? +qs.get('pp') : 12, pag: Math.max(1, parseInt(qs.get('pag'), 10) || 1) };
     if (F.q) F.q.value = qs.get('q') || '';
     setSel(F.cat, qs.get('cat'));
@@ -300,7 +349,7 @@
     var ord = $('#orden'), ppSel = $('#pp'), res = $('#results'), count = $('#count'), pagesEl = $('#pages'), chips = $('#chips');
     ord.value = X.orden; if (ord.value !== X.orden) { X.orden = 'dest'; ord.value = 'dest'; }
     ppSel.value = String(X.pp);
-    var render = function (scroll) {
+    var render = function (scroll, dragging) {
       var s = readForm(); s.serie = X.serie; s.km0 = X.km0;
       var list = S.filter(function (v) { return match(v, s); });
       var o = X.orden, R0 = { camion: 0, pickup: 1, furgoneta: 2, turismo: 3 };
@@ -317,18 +366,24 @@
       var part = list.slice((X.pag - 1) * X.pp, X.pag * X.pp);
       res.innerHTML = n ? part.map(function (v) { return card(v, true); }).join('')
         : '<div class="empty"><h2>Ahora mismo no hay ninguno así</h2><p>Prueba a quitar algún filtro o <a href="' + wa('Hola, busco un vehículo que no encuentro en la web: ') + '" target="_blank" rel="noopener">dinos qué buscas por WhatsApp</a>.</p></div>';
-      count.innerHTML = '<b>' + n + '</b> ' + (n === 1 ? 'vehículo encontrado' : 'vehículos de ocasión encontrados') + (pages > 1 ? ' (' + X.pag + ' de ' + pages + ')' : '');
+      count.innerHTML = '<b>' + n + '</b> ' + (n === 1 ? 'vehículo encontrado' : 'vehículos encontrados') + (pages > 1 ? ' (' + X.pag + ' de ' + pages + ')' : '');
       pagesEl.textContent = pages > 1 ? 'Página ' + X.pag + ' de ' + pages : '';
       $$('.pg-prev').forEach(function (b) { b.disabled = X.pag <= 1; });
       $$('.pg-next').forEach(function (b) { b.disabled = X.pag >= pages; });
       var ch = [];
       if (X.serie) ch.push('<button class="chip" type="button" data-x="serie" aria-label="Quitar filtro: ' + SERIES[X.serie] + '">' + SERIES[X.serie] + '</button>');
-      if (X.km0) ch.push('<button class="chip" type="button" data-x="km0" aria-label="Quitar filtro: nuevos y KM 0">Nuevos y KM 0</button>');
+      if (X.km0) ch.push('<button class="chip" type="button" data-x="km0" aria-label="Quitar filtro: nuevos y km 0">Nuevos y km 0</button>');
       chips.innerHTML = ch.join('');
-      history.replaceState(null, '', location.pathname + toQuery(s, X));
-      if (scroll) { var top = $('.listado').getBoundingClientRect().top + window.pageYOffset - 10; window.scrollTo({ top: top, behavior: reduce ? 'auto' : 'smooth' }); }
+      // la dirección se actualiza al soltar el tirador, no en cada paso del arrastre
+      if (!dragging) history.replaceState(null, '', location.pathname + toQuery(s, X));
+      if (scroll) {
+        var top = $('.listado').getBoundingClientRect().top + window.pageYOffset - 10;
+        window.scrollTo({ top: top, behavior: reduce ? 'auto' : 'smooth' });
+        var fa = $('#results a'); if (fa) fa.focus({ preventScroll: true });
+      }
     };
-    onChange = function () { X.pag = 1; render(); };
+    onChange = function (dragging) { X.pag = 1; render(false, dragging === true); };
+    refresh = function () { render(); };
     ord.addEventListener('change', function () { X.orden = ord.value; X.pag = 1; render(); });
     ppSel.addEventListener('change', function () { X.pp = +ppSel.value; X.pag = 1; render(); });
     $$('.pg-prev').forEach(function (b) { b.addEventListener('click', function () { if (X.pag > 1) { X.pag--; render(true); } }); });
@@ -357,12 +412,13 @@
     var v = ALL.find(function (x) { return x.id === id; });
     var root = $('#ficha');
     if (!v) {
+      document.title = 'Vehículo no disponible | Bilbotruck';
       root.innerHTML = '<div class="wrap notfound"><h1>Este vehículo ya no está</h1><p>Es posible que se haya vendido. Echa un vistazo al resto del stock.</p><p><a class="btn" href="stock.html">Ver vehículos de ocasión</a></p></div>';
       return;
     }
     document.title = nombre(v) + ' (' + v.anio + ') · ' + precioTxt(v) + ' | Bilbotruck';
     var imgs = []; for (var k = 1; k <= v.fotos; k++) imgs.push(B + 'assets/stock/' + v.id + '-' + k + '.jpg');
-    var estado = v.nuevo ? (v.garantia >= 60 ? 'Nuevo' : 'KM 0') : 'De ocasión';
+    var estado = v.nuevo ? (v.garantia >= 60 ? 'Nuevo' : 'km 0') : 'De ocasión';
     var DROWS = [
       ['Año', v.anio, 'cal'], ['Kilómetros', v.nuevo ? '0 km' : fmt(v.km) + ' km', 'gauge'], ['Potencia', v.cv ? v.cv + ' CV' : null, 'zap'],
       ['Cilindrada', v.cc ? v.cc + ' cm³' : null, 'dots'], ['Combustible', v.comb, 'fuel'], ['Cambio', v.cambio, 'gear'],
@@ -370,7 +426,7 @@
     ].filter(function (r) { return r[1] !== null && r[1] !== undefined && r[1] !== ''; }).slice(0, 7);
     var ROWS = [
       ['Marca', v.marca], ['Modelo', v.modelo], ['Versión', v.version], ['Carrocería', v.carroceria],
-      ['Año', v.anio], ['Kilómetros', v.nuevo ? '0 km (nuevo)' : fmt(v.km) + ' km'],
+      ['Año', v.anio], ['Kilómetros', v.nuevo ? (v.garantia >= 60 ? '0 km (nuevo)' : '0 km (km 0)') : fmt(v.km) + ' km'],
       ['Potencia', v.cv ? v.cv + ' CV' : null], ['Cilindrada', v.cc ? v.cc + ' cm³' : null],
       ['Combustible', v.comb], ['Cambio', v.cambio], ['MMA', v.mma], ['Plazas', v.plazas],
       ['Caja interior', v.medidas], ['Horas de trabajo', v.horas], ['Etiqueta DGT', v.etiqueta],
@@ -379,15 +435,16 @@
     ].filter(function (r) { return r[1] !== null && r[1] !== undefined && r[1] !== ''; });
     var trust = [];
     if (v.incluye && v.incluye.length) trust.push('Incluye ' + v.incluye.map(function (x) { return x === 'ITV' ? x : x.charAt(0).toLowerCase() + x.slice(1); }).join(', ').replace(/, ([^,]*)$/, ' y $1') + '.');
-    else trust.push('Revisado en nuestro taller oficial Isuzu antes de la entrega.');
+    else trust.push('Pregúntanos qué incluye el precio (revisión, ITV y transferencia).');
     if (v.garantia) trust.push('Garantía de ' + garTxt(v.garantia) + '.');
-    if (v.unico) trust.push('Único dueño: viene de nuestra propia flota.');
-    if (v.ayto) trust.push('Procede de un ayuntamiento.');
+    if (v.unico) trust.push(v.ayto ? 'Un solo dueño. Uso anterior: un ayuntamiento.' : 'Único dueño: nuestra propia flota.');
+    else if (v.ayto) trust.push('Procede de un ayuntamiento.');
     trust.push('Puedes verlo en Bedia de lunes a sábado.');
     trust.push('Vendemos a cualquier punto de España.');
     var msg = 'Hola, me interesa el ' + nombre(v) + ' (' + v.anio + ', ' + precioTxt(v) + ') que tenéis en la web. ¿Sigue disponible?';
-    var rel = S.filter(function (x) { return x.cat === v.cat && x.id !== v.id; })
-      .sort(function (a, b) { return Math.abs(final(a) - final(v)) - Math.abs(final(b) - final(v)); }).slice(0, 4);
+    var byDist = function (a, b) { return Math.abs(final(a) - final(v)) - Math.abs(final(b) - final(v)); };
+    var rel = S.filter(function (x) { return x.cat === v.cat && x.id !== v.id; }).sort(byDist).slice(0, 4);
+    if (rel.length < 4) rel = rel.concat(S.filter(function (x) { return x.cat !== v.cat && x.id !== v.id; }).sort(byDist).slice(0, 4 - rel.length));
     var tabs = [['Ficha técnica', ROWS.map(function (r) { return '<li><b>' + r[0] + ':</b> ' + esc(r[1]) + '</li>'; }).join('')], ['Lo que incluye', trust.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('')]];
     if (v.desc && v.desc.length) tabs.push(['Descripción', v.desc.map(function (d) { return '<li>' + esc(d) + '</li>'; }).join('')]);
 
@@ -407,7 +464,7 @@
           '</div>' +
           '<div class="f-photo">' +
             '<button class="f-main" type="button" aria-label="Ampliar la foto"><img id="gal-img" src="' + imgs[0] + '" width="800" height="600" alt="' + esc(nombre(v)) + ', foto 1 de ' + imgs.length + '"></button>' +
-            rib(v) + (v.ayto ? '<span class="f-ayto">Ex-ayuntamiento</span>' : '') +
+            rib(v) + (v.ayto ? '<span class="f-ayto">De ayuntamiento</span>' : '') +
             '<span class="f-count" aria-hidden="true">1 / ' + imgs.length + '</span>' +
           '</div>' +
           '<div class="f-data"><h2>Datos del vehículo</h2><dl>' +
@@ -424,14 +481,15 @@
         '<div class="wrap f-dark-in">' +
           '<div><h2>Solicitar información</h2>' +
             '<form id="form-info" novalidate>' +
+              '<p class="f-req">Los campos con * son obligatorios.</p>' +
               '<div class="frows">' +
                 '<label for="i-nombre">Nombre y apellidos <span aria-hidden="true">*</span></label><input id="i-nombre" name="nombre" autocomplete="name" required>' +
                 '<label for="i-tel">Teléfono <span aria-hidden="true">*</span></label><input id="i-tel" name="tel" type="tel" inputmode="tel" autocomplete="tel" required>' +
                 '<label for="i-mail">Email</label><input id="i-mail" name="email" type="email" autocomplete="email">' +
                 '<label for="i-com">Comentarios</label><textarea id="i-com" name="comentario" rows="4"></textarea>' +
               '</div>' +
-              '<label class="chk"><input type="checkbox" name="acepto" required><span>Acepto que Bilbotruck use estos datos para contestar a mi solicitud. <span aria-hidden="true">*</span></span></label>' +
-              '<button class="btn" type="submit"><span>Enviar solicitud</span>' + ico('chevR') + '</button>' +
+              '<label class="chk"><input type="checkbox" name="acepto" required><span>He leído y acepto la ' + PRIV + '.&nbsp;<span aria-hidden="true">*</span></span></label>' +
+              '<button class="btn" type="submit">' + WA_ICO + '<span>Enviar por WhatsApp</span></button>' +
               '<p class="form-msg" role="status"></p>' +
             '</form></div>' +
           '<div class="ven"><h2>Ven a conocerlo</h2>' +
@@ -504,10 +562,15 @@
         else if (!e.shiftKey && document.activeElement === z) { e.preventDefault(); a.focus(); }
       }
     });
-    var x0 = null;
+    var x0 = null, y0 = 0;
     [$('.f-photo', root), lb].forEach(function (zone) {
-      zone.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; }, { passive: true });
-      zone.addEventListener('touchend', function (e) { if (x0 === null) return; var dx = e.changedTouches[0].clientX - x0; if (Math.abs(dx) > 40) showImg(cur2 + (dx < 0 ? 1 : -1)); x0 = null; }, { passive: true });
+      zone.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+      zone.addEventListener('touchend', function (e) {
+        if (x0 === null) return;
+        var dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
+        if (Math.abs(dx) > 40 && Math.abs(dx) > 1.5 * Math.abs(dy)) showImg(cur2 + (dx < 0 ? 1 : -1));
+        x0 = null;
+      }, { passive: true });
     });
     imgs.slice(1, 3).forEach(function (s) { var im = new Image(); im.src = s; });
 
@@ -527,8 +590,13 @@
     var minD = new Date(today); minD.setDate(minD.getDate() + 1);
     var maxD = new Date(today); maxD.setDate(maxD.getDate() + 60);
     var view = new Date(minD.getFullYear(), minD.getMonth(), 1), chosen = null, focusD = null;
-    var ok = function (d) { return d >= minD && d <= maxD && d.getDay() !== 0; };
     var key = function (d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
+    // festivos nacionales (fijos) y Semana Santa 2027 en Euskadi; los locales de Bedia, cuando los confirme el cliente
+    var FEST = { '01-01': 1, '01-06': 1, '05-01': 1, '08-15': 1, '10-12': 1, '11-01': 1, '12-06': 1, '12-08': 1, '12-25': 1 };
+    var FEST_Y = { '2027-03-25': 1, '2027-03-26': 1, '2027-03-29': 1 };
+    var fest = function (d) { var k = key(d); return !!(FEST[k.slice(5)] || FEST_Y[k]); };
+    var ok = function (d) { return d >= minD && d <= maxD && d.getDay() !== 0 && !fest(d); };
+    var calLive = $('#cal-live');
     var label = function (d) { return DOWL[(d.getDay() + 6) % 7] + ' ' + d.getDate() + ' de ' + MESES[d.getMonth()]; };
     var same = function (a, b) { return a && b && +a === +b; };
     var inView = function (d) { return d && d.getMonth() === view.getMonth() && d.getFullYear() === view.getFullYear(); };
@@ -538,22 +606,22 @@
       var target = focusOn && inView(focusOn) ? focusOn : inView(chosen) ? chosen : inView(focusD) && ok(focusD) ? focusD : null;
       if (!target) for (var t = 1; t <= days; t++) { var dd = new Date(y, m, t); if (ok(dd)) { target = dd; break; } }
       var h = '<div class="cal-head"><button type="button" class="cal-prev" aria-label="Mes anterior"' + (new Date(y, m, 0) >= minD ? '' : ' disabled') + '>' + ico('chevL') + '</button>' +
-        '<b id="cal-mes" aria-live="polite">' + MESES[m] + ' ' + y + '</b>' +
+        '<b id="cal-mes">' + MESES[m] + ' ' + y + '</b>' +
         '<button type="button" class="cal-next" aria-label="Mes siguiente"' + (new Date(y, m + 1, 1) <= maxD ? '' : ' disabled') + '>' + ico('chevR') + '</button></div>' +
         '<div class="cal-grid" role="group" aria-labelledby="cal-mes">' + ['L', 'M', 'X', 'J', 'V', 'S', 'D'].map(function (x) { return '<div class="cal-dow" aria-hidden="true">' + x + '</div>'; }).join('');
       for (var i = 0; i < lead; i++) h += '<div class="cal-day" aria-hidden="true"></div>';
       for (var d = 1; d <= days; d++) {
         var dt = new Date(y, m, d), av = ok(dt);
         h += '<div class="cal-day"><button type="button" data-d="' + key(dt) + '"' + (av ? '' : ' disabled') + ' aria-pressed="' + (same(dt, chosen) ? 'true' : 'false') + '"' +
-          ' aria-label="' + label(dt) + (av ? '' : ', no disponible') + '" tabindex="' + (same(dt, target) ? '0' : '-1') + '"' + (same(dt, today) ? ' class="today"' : '') + '>' + d + '</button></div>';
+          ' aria-label="' + label(dt) + (av ? '' : fest(dt) ? ', festivo' : ', no disponible') + '" tabindex="' + (same(dt, target) ? '0' : '-1') + '"' + (same(dt, today) ? ' class="today"' : '') + '>' + d + '</button></div>';
       }
       cal.innerHTML = h + '</div>';
       if (focus) { var fb = $('.cal-day button[tabindex="0"]', cal); if (fb) fb.focus(); }
     };
     cal.addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b || b.disabled) return;
-      if (b.classList.contains('cal-prev')) { view = new Date(view.getFullYear(), view.getMonth() - 1, 1); draw(); $('.cal-prev', cal).focus(); return; }
-      if (b.classList.contains('cal-next')) { view = new Date(view.getFullYear(), view.getMonth() + 1, 1); draw(); var nx = $('.cal-next', cal); if (nx.disabled) $('.cal-prev', cal).focus(); else nx.focus(); return; }
+      if (b.classList.contains('cal-prev')) { view = new Date(view.getFullYear(), view.getMonth() - 1, 1); draw(); var pv = $('.cal-prev', cal); if (pv.disabled) $('.cal-next', cal).focus(); else pv.focus(); if (calLive) calLive.textContent = 'Mostrando ' + MESES[view.getMonth()] + ' de ' + view.getFullYear(); return; }
+      if (b.classList.contains('cal-next')) { view = new Date(view.getFullYear(), view.getMonth() + 1, 1); draw(); var nx = $('.cal-next', cal); if (nx.disabled) $('.cal-prev', cal).focus(); else nx.focus(); if (calLive) calLive.textContent = 'Mostrando ' + MESES[view.getMonth()] + ' de ' + view.getFullYear(); return; }
       var p = b.getAttribute('data-d').split('-');
       chosen = new Date(+p[0], +p[1] - 1, +p[2]); focusD = chosen;
       hid.value = key(chosen);
