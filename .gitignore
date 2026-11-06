@@ -6,3 +6,4 @@ _*.mjs
 _*.ps1
 js/data.json
 node_modules/
+_review/
